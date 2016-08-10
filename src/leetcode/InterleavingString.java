@@ -4,27 +4,29 @@ package leetcode;
  * Created by t-nashan on 8/9/2016.
  */
 public class InterleavingString {
-    private boolean flag = false;
     public boolean isInterleave(String s1, String s2, String s3) {
-        if (s3.length() != s1.length() + s2.length()) return false;
-        helper(s1, s2, s3, 0, "", "");
-        return flag;
-    }
-
-    private void helper(String s1, String s2, String s3, int i, String t1, String t2) {
-        if (flag) return;
-        if (i == s3.length()) {
-            if (t1.equals(s1) && t2.equals(s2)) flag = true;
-            return;
-        }
-        if (t1.length() > s1.length()) return;
-        if (t2.length() > s2.length()) return;
-        helper(s1, s2, s3, i + 1, t1 + s3.charAt(i), t2);
-        helper(s1, s2, s3, i + 1, t1, t2 + s3.charAt(i));
+        int row = s1.length(), col = s2.length();
+        if (row + col != s3.length()) return false;
+        boolean[][] dp = new boolean[row + 1][col + 1];
+        dp[0][0] = true;
+        for (int i = 1; i <= row; i++)
+            dp[i][0] = s1.charAt(i - 1) == s3.charAt(i - 1) ? dp[i - 1][0] : false;
+        for (int i = 1; i <= col; i++)
+            dp[0][i] = s2.charAt(i - 1) == s3.charAt(i - 1) ? dp[0][i - 1] : false;
+        for (int i = 1; i <= row; i++)
+            for (int j = 1; j <= col; j++) {
+                char c3 = s3.charAt(i + j - 1);
+                char c1 = s1.charAt(i - 1);
+                char c2 = s2.charAt(j - 1);
+                if (c3 == c1 && c3 != c2) dp[i][j] = dp[i - 1][j];
+                else if (c3 != c1 && c3 == c2) dp[i][j] = dp[i][j - 1];
+                else if (c3 == c1 && c3 == c2) dp[i][j] = dp[i - 1][j] || dp[i][j - 1];
+            }
+        return dp[row][col];
     }
 
     public static void main(String[] args) {
-        System.out.println(new InterleavingString().isInterleave("abaaacbacaab", "bcccababccc", "bcccabaaaaabccaccbacabb"));
+        System.out.println(new InterleavingString().isInterleave("aabcc", "dbbca", "aadbbbaccc"));
 //        "abaaacbacaab"
 //        "bcccababccc"
 //        "bcccabaaaaabccaccbacabb"
