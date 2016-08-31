@@ -2,51 +2,53 @@ package lintcode;
 
 import util.DirectedGraphNode;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Created by t-nashan on 8/31/2016.
  */
 public class TopologicalSorting {
+    static class Vertex {
+        DirectedGraphNode node;
+        int inDegree;
+        public Vertex(DirectedGraphNode node, int in) {
+            this.node = node;
+            this.inDegree = in;
+        }
+    }
 
     /**
      * @param graph: A list of Directed graph node
      * @return: Any topological order for the given graph.
      */
     public ArrayList<DirectedGraphNode> topSort(ArrayList<DirectedGraphNode> graph) {
-        ArrayList<DirectedGraphNode> sorted = new ArrayList<DirectedGraphNode>();
-        int len = graph.size();
-        HashSet<DirectedGraphNode> visited = new HashSet<>();
-        int from = 0;
-        for (int j = 0; j < len; j++) {
-            if (!visited.contains(graph.get(j))) {
-                sorted.add(graph.get(j));
-                visited.add(graph.get(j));
-                for (int i = from; i < sorted.size(); i++) {
-                    DirectedGraphNode cur = sorted.get(i);
-                    ArrayList<DirectedGraphNode> neighbors = cur.neighbors;
-                    for (DirectedGraphNode node : neighbors)
-                        if (visited.contains(node)) sorted.remove(node);
-                    for (DirectedGraphNode node : neighbors)
-                        if (visited.contains(node)) sorted.add(node);
-                    for (DirectedGraphNode node : neighbors)
-                        if (!visited.contains(node)) {
-                            sorted.add(node);
-                            visited.add(node);
-                        }
-                    i = sorted.indexOf(cur);
-                }
-                from = sorted.size();
+        PriorityQueue<Vertex> heap = new PriorityQueue<>(10, new Comparator<Vertex>() {
+            @Override
+            public int compare(Vertex o1, Vertex o2) {
+                return Integer.compare(o1.inDegree, o2.inDegree);
+            }
+        });
+        HashMap<DirectedGraphNode, Vertex> map = new HashMap<>();
+        for (DirectedGraphNode node : graph) map.put(node, new Vertex(node, 0));
+        for (DirectedGraphNode node : graph) {
+            ArrayList<DirectedGraphNode> neighbors = node.neighbors;
+            for (DirectedGraphNode n : neighbors) {
+                map.get(n).inDegree++;
+            }
+        }
+        for (Vertex v : map.values()) heap.add(v);
+        ArrayList<DirectedGraphNode> sorted = new ArrayList<>();
+        while (!heap.isEmpty()) {
+            Vertex min = heap.poll();
+            sorted.add(min.node);
+            ArrayList<DirectedGraphNode> neighbors = min.node.neighbors;
+            for (DirectedGraphNode n : neighbors) {
+                map.get(n).inDegree--;
+                heap.remove(map.get(n));
+                heap.add(map.get(n));
             }
         }
         return sorted;
-    }
-
-    private void dfs(DirectedGraphNode node, int depth, HashSet<DirectedGraphNode> visited, ) {
-        if (visited.contains(node)) return;
     }
 
     public static void main(String[] args) {
