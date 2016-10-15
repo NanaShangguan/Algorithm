@@ -12,15 +12,14 @@ public class Main {
 
         int n = in.nextInt();
         double[] dp = new double[n + 1];
+        double[] sum = new double[n + 1];
 
         dp[1] = 1.0; dp[2] = 1.0;
+        sum[1] = 1.0; sum[2] = 2.0;
         for (int i = 3; i <= n; i++) {
             dp[i] += (dp[i - 2] + 1) * (1.0 / i) * 2;
-            int mid = i / 2;
-            for (int j = 2; j <= mid; j++)
-                dp[i] += (dp[j - 2] + 1 + dp[i - j - 1]) * (1.0 / i) * 2;
-            if ((i & 1) == 1)
-                dp[i] += (dp[mid - 1] + 1 + dp[i - mid - 2]) * (1.0 / i);
+            dp[i] += (sum[i - 3] * 2 + (i - 2)) / i;
+            sum[i] = sum[i - 1] + dp[i];
         }
 
         out.println(dp[n]);
